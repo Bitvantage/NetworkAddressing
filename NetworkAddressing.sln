@@ -1,0 +1,57 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.4.33205.214
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NetworkAddressing", "NetworkAddressing\NetworkAddressing.csproj", "{FFDDBDE3-0DAC-4A52-B001-E8CE1C0B415A}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Test", "Test\Test.csproj", "{D6B32E4A-6AE6-4B2D-85DB-AA8827783764}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PerformanceTest", "PerformanceTest\PerformanceTest.csproj", "{101C1C2C-9488-4DFE-BD23-130ED657204D}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{A7CB4732-D720-405A-985B-89B04964B8ED}"
+	ProjectSection(SolutionItems) = preProject
+		CODE_OF_CONDUCT.md = CODE_OF_CONDUCT.md
+		README.md = README.md
+		LICENSE.txt = LICENSE.txt
+		TODO.md = TODO.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Documentation", "Documentation", "{B11BD9DB-6E0D-4628-A498-A616F4CAB6BF}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Media", "Media", "{16BEAE24-351D-4C95-839E-6A2357E1D4CE}"
+	ProjectSection(SolutionItems) = preProject
+		Documentation\Media\NetworkLookup-Tree-Small.svg = Documentation\Media\NetworkLookup-Tree-Small.svg
+		Documentation\Media\NetworkLookup-Tree-Wide.png = Documentation\Media\NetworkLookup-Tree-Wide.png
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{FFDDBDE3-0DAC-4A52-B001-E8CE1C0B415A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FFDDBDE3-0DAC-4A52-B001-E8CE1C0B415A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FFDDBDE3-0DAC-4A52-B001-E8CE1C0B415A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FFDDBDE3-0DAC-4A52-B001-E8CE1C0B415A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D6B32E4A-6AE6-4B2D-85DB-AA8827783764}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D6B32E4A-6AE6-4B2D-85DB-AA8827783764}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D6B32E4A-6AE6-4B2D-85DB-AA8827783764}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D6B32E4A-6AE6-4B2D-85DB-AA8827783764}.Release|Any CPU.Build.0 = Release|Any CPU
+		{101C1C2C-9488-4DFE-BD23-130ED657204D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{101C1C2C-9488-4DFE-BD23-130ED657204D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{101C1C2C-9488-4DFE-BD23-130ED657204D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{101C1C2C-9488-4DFE-BD23-130ED657204D}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{B11BD9DB-6E0D-4628-A498-A616F4CAB6BF} = {A7CB4732-D720-405A-985B-89B04964B8ED}
+		{16BEAE24-351D-4C95-839E-6A2357E1D4CE} = {B11BD9DB-6E0D-4628-A498-A616F4CAB6BF}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {2403E204-094F-46A8-BF06-4A949EBE2F5F}
+	EndGlobalSection
+EndGlobal

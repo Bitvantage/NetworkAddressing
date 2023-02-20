@@ -1,0 +1,45 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net7.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <RootNamespace>Bitvantage.$(MSBuildProjectName.Replace(" ", "_"))</RootNamespace>
+    <AssemblyName>Bitvantage.$(MSBuildProjectName)</AssemblyName>
+    <Title>Network Addressing</Title>
+    <PackageProjectUrl>https://github.com/Bitvantage/NetworkAddressing</PackageProjectUrl>
+    <PackageIcon>icon.png</PackageIcon>
+    <RepositoryType>git</RepositoryType>
+    <PackageTags>network;networking;ip network;mac;mac address;oui;network lookup;ipaddress; ip address;route;routing;lookup;trie;tree</PackageTags>
+    <VersionPrefix>0.0.0.1</VersionPrefix>
+    <FileVersion>1.0.0.0</FileVersion>
+    <AssemblyVersion>1.0.0.0</AssemblyVersion>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <Copyright>LGPL-2.1-only</Copyright>
+    <PackageLicenseExpression>LGPL-2.1-only</PackageLicenseExpression>
+    <Description>A library for working with network addresses. Includes a network class that represents IP networks, a network lookup class for high performance prefix matching using a variable stride trie, MAC address class that represents an Ethernet MAC address, and a OUI lookup class to retrieve manufacturer information of MAC addresses</Description>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Remove="Ethernet\Resources\oui.txt.br" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="Ethernet\Resources\oui.txt.br" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="..\README.md">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </None>
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="icon.png">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </None>
+  </ItemGroup>
+
+</Project>
