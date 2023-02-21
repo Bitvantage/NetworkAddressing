@@ -11,7 +11,7 @@
     <PackageIcon>icon.png</PackageIcon>
     <RepositoryType>git</RepositoryType>
     <PackageTags>network;networking;ip network;mac;mac address;oui;network lookup;ipaddress; ip address;route;routing;lookup;trie;tree</PackageTags>
-    <VersionPrefix>0.0.0.1</VersionPrefix>
+    <VersionPrefix>1.0.0.0</VersionPrefix>
     <FileVersion>1.0.0.0</FileVersion>
     <AssemblyVersion>1.0.0.0</AssemblyVersion>
     <PackageReadmeFile>README.md</PackageReadmeFile>

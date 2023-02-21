@@ -86,11 +86,11 @@ Below is a visualization of a small tree that contains 10 networks. The orange n
 
 Network node have between zero and two children, container nodes have exactly two nodes. The child that is contained in the first half of the parents address space is on the left side, the child that is contained by the last half of the parents address space is on the right side. Container nodes are automatically added and removed to maintain the correct parent child relationship.
 
-![Small Network Tree](Documentation/Media/NetworkLookup-Tree-Small.svg)
+![Small Network Tree](https://raw.githubusercontent.com/Bitvantage/NetworkAddressing/master/Documentation/Media/NetworkLookup-Tree-Small.svg)
 
 As more networks are added to the tree, the tree tends to grow in width far more quickly then depth. Since the depth of the tree is directly proportional to the search performance, it is possible to rapidly search a tree with millions of networks while only examining a relatively small number of the nodes.
 
-![Wide Network Tree](Documentation/Media/NetworkLookup-Tree-Wide.png)
+![Wide Network Tree](https://raw.githubusercontent.com/Bitvantage/NetworkAddressing/master/Documentation/Media/NetworkLookup-Tree-Wide.png)
 
 ## Performance
 Performance will vary based on many factors. On an older AMD Ryzen 5 1600X single thread lookup speed of a tree with one million networks is 1.25 million lookups per second. As a point of reference, a Dictionary used for exact matches is about to do around 10 million lookups per second.
