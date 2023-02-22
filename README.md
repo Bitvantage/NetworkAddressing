@@ -10,9 +10,9 @@ A library for working with network addresses
 # License
 The NetworkAddressing library is licensed under LGPL v2.1
 
-# Installing via NuGet
+# Installing via NuGet Package Manager
 ```sh
-dotnet add package NetworkAddressing
+PM> NuGet\Install-Package Bitvantage.NetworkAddressing
 ```
 
 # Overview
