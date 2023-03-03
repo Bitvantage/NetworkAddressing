@@ -87,7 +87,7 @@ public class MacAddress
                 # aa-aa-aa-aa-aa-aa
                 (?<octet1>[0-9a-fA-F]{2})-(?<octet2>[0-9a-fA-F]{2})-(?<octet3>[0-9a-fA-F]{2})-(?<octet4>[0-9a-fA-F]{2})-(?<octet5>[0-9a-fA-F]{2})-(?<octet6>[0-9a-fA-F]{2})|
                 # aa.aa.aa.aa.aa.aa
-                (?<octet1>[0-9a-fA-F]{2}).(?<octet2>[0-9a-fA-F]{2}).(?<octet3>[0-9a-fA-F]{2}).(?<octet4>[0-9a-fA-F]{2}).(?<octet5>[0-9a-fA-F]{2}).(?<octet6>[0-9a-fA-F]{2})|
+                (?<octet1>[0-9a-fA-F]{2})\.(?<octet2>[0-9a-fA-F]{2})\.(?<octet3>[0-9a-fA-F]{2})\.(?<octet4>[0-9a-fA-F]{2})\.(?<octet5>[0-9a-fA-F]{2})\.(?<octet6>[0-9a-fA-F]{2})|
                 # aaaa:aaaa:aaaa
                 (?<octet1>[0-9a-fA-F]{2})(?<octet2>[0-9a-fA-F]{2}):(?<octet3>[0-9a-fA-F]{2})(?<octet4>[0-9a-fA-F]{2}):(?<octet5>[0-9a-fA-F]{2})(?<octet6>[0-9a-fA-F]{2})|
                 # aaaa.aaaa.aaaa.aaaa

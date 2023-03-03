@@ -161,7 +161,13 @@ internal class MacAddressTests
         var macAddress = MacAddress.Parse("de:ad:be:ef:ab:cd");
         Assert.That(macAddress, Is.EqualTo(new MacAddress(new byte[] { 0xde, 0xad, 0xbe, 0xef, 0xab, 0xcd })));
     }
-    
+
+    [Test]
+    public void Parse_07()
+    {
+        Assert.Throws<ArgumentException>(() => MacAddress.Parse("de ad be ef ab cd"));
+    }
+
     [Test]
     public void OrganizationalUniqueIdentifier_01()
     {
@@ -175,5 +181,7 @@ internal class MacAddressTests
         var macAddress = MacAddress.Parse("de:ad:be:ef:ab:cd");
         Assert.That(macAddress.ExtensionIdentifier, Is.EqualTo(new MacAddress(new byte[] { 0x00, 0x00, 0x00, 0xef, 0xab, 0xcd })));
     }
+
+
 }
 
