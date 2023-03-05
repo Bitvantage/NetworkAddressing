@@ -22,6 +22,38 @@ namespace Test.Ethernet;
 internal class MacAddressTests
 {
     [Test]
+    public void CompareTo_01()
+    {
+        var unsortedMacAddresses = new List<MacAddress?>
+        {
+            "20-20-30-40-50-60",
+            "10-20-30-40-50-60",
+            "10-20-30-40-50-61",
+            "00-00-00-00-00-01",
+            "00-00-00-00-00-00",
+            null,
+        };
+
+        var expectedResults = new List<MacAddress?>
+        {
+            null,
+            "00-00-00-00-00-00",
+            "00-00-00-00-00-01",
+            "10-20-30-40-50-60",
+            "10-20-30-40-50-61",
+            "20-20-30-40-50-60",
+
+        };
+
+        var orderedMacAddresses =
+            unsortedMacAddresses
+                .Order()
+                .ToList();
+
+        Assert.That(orderedMacAddresses, Is.EquivalentTo(expectedResults));
+    }
+
+    [Test]
     public void ExtensionIdentifier_01()
     {
         var macAddress = MacAddress.Parse("de:ad:be:ef:ab:cd");

@@ -23,7 +23,7 @@ using System.Text.RegularExpressions;
 namespace Bitvantage.NetworkAddressing.Ethernet;
 
 [Serializable]
-public class MacAddress
+public class MacAddress : IComparable<MacAddress>
 {
     public enum MacAddressFormat
     {
@@ -390,5 +390,17 @@ public class MacAddress
             return null;
 
         throw new ArgumentException("Unsupported format", nameof(macAddress));
+    }
+
+
+    public int CompareTo(MacAddress? other)
+    {
+        if (ReferenceEquals(this, other))
+            return 0;
+
+        if (ReferenceEquals(null, other))
+            return 1;
+
+        return MacAddressBits.CompareTo(other.MacAddressBits);
     }
 }
