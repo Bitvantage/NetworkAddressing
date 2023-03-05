@@ -15,6 +15,8 @@
     Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
+using System.ComponentModel;
+using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Net;
 using System.Net.Sockets;
@@ -22,6 +24,9 @@ using System.Numerics;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Text.Json.Serialization;
+using System.Xml;
+using System.Xml.Schema;
+using System.Xml.Serialization;
 using Bitvantage.NetworkAddressing.InternetProtocol.Converters;
 
 namespace Bitvantage.NetworkAddressing.InternetProtocol;
@@ -67,7 +72,7 @@ public enum IPVersion
 
 [Serializable]
 [JsonConverter(typeof(NetworkJsonConverter))]
-public class Network : IComparable<Network>
+public class Network : IComparable<Network>, IXmlSerializable
 {
     private static readonly UInt128[] Ipv4HostMaskBits = new UInt128[33];
     private static readonly UInt128[] Ipv6HostMaskBits = new UInt128[129];
@@ -94,8 +99,8 @@ public class Network : IComparable<Network>
     private static readonly NetworkLookup<NetworkClass> Classes;
 
 
-    internal readonly ushort AddressLength;
-    internal readonly UInt128 NetworkBits;
+    internal ushort AddressLength;
+    internal UInt128 NetworkBits;
 
     public AddressAllocation Allocation => Allocations.GetMatch(this).Value;
 
@@ -226,11 +231,6 @@ public class Network : IComparable<Network>
     }
 
     /// <summary>
-    ///     The version of Internet Protocol represented by the network address
-    /// </summary>
-    public IPVersion Version { get; }
-
-    /// <summary>
     ///     The wildcard mask of the network.
     ///     A wildcard mask is the inverted subnet mask
     /// </summary>
@@ -250,16 +250,21 @@ public class Network : IComparable<Network>
     /// <summary>
     ///     The network address
     /// </summary>
-    public IPAddress Address { get; init; }
+    public IPAddress Address { get; set; }
 
     /// <summary>
     ///     The number of bits that are used to represent the network portion of the address
     /// </summary>
-    public int Prefix { get; init; }
+    public int Prefix { get; set; }
 
-    internal UInt128 HostMaskBits { get; }
+    /// <summary>
+    ///     The version of Internet Protocol represented by the network address
+    /// </summary>
+    public IPVersion Version { get; set; }
 
-    internal UInt128 NetworkMaskBits { get; }
+    internal UInt128 HostMaskBits { get; set; }
+
+    internal UInt128 NetworkMaskBits { get; set; }
 
     static Network()
     {
@@ -439,54 +444,15 @@ public class Network : IComparable<Network>
         };
     }
 
+    private Network()
+    {
+    }
+
     public Network(IPAddress ipAddress, int prefix)
     {
-        if (ipAddress.AddressFamily != AddressFamily.InterNetwork && ipAddress.AddressFamily != AddressFamily.InterNetworkV6)
-            throw new NotSupportedException($"Non-IPv4 or IPv6 addresses are not supported. The specified address family is {ipAddress.AddressFamily}");
-
-        if (ipAddress.AddressFamily == AddressFamily.InterNetwork && prefix > 32)
-            throw new ArgumentOutOfRangeException(nameof(prefix), "Maximum mask length of a IPv4 address is 32");
-
-        if (ipAddress.AddressFamily == AddressFamily.InterNetworkV6 && prefix > 128)
-            throw new ArgumentOutOfRangeException(nameof(prefix), "Maximum mask length of a IPv6 address is 128");
-
-        Address = ipAddress;
-        Prefix = prefix;
-
-        Version = ipAddress.AddressFamily switch
-        {
-            AddressFamily.InterNetwork => IPVersion.IPv4,
-            AddressFamily.InterNetworkV6 => IPVersion.IPv6,
-            _ => throw new ArgumentOutOfRangeException()
-        };
-
-
-        NetworkMaskBits = Version switch
-        {
-            IPVersion.IPv4 => Ipv4NetworkMaskBits[Prefix],
-            IPVersion.IPv6 => Ipv6NetworkMaskBits[Prefix],
-            _ => throw new ArgumentOutOfRangeException()
-        };
-
-        HostMaskBits = Version switch
-        {
-            IPVersion.IPv4 => Ipv4HostMaskBits[Prefix],
-            IPVersion.IPv6 => Ipv6HostMaskBits[Prefix],
-            _ => throw new ArgumentOutOfRangeException()
-        };
-
-        // truncate the network address
-        // for example 10.1.2.3/8 becomes 10.0.0.0/8
-        NetworkBits = ipAddress.ToUInt128() & NetworkMaskBits;
-        Address = UInt128ToIpAddress(NetworkBits);
-
-        AddressLength = Version switch
-        {
-            IPVersion.IPv4 => 32,
-            IPVersion.IPv6 => 128,
-            _ => throw new ArgumentOutOfRangeException()
-        };
+        SetNetworkValues(ipAddress, prefix);
     }
+
 
     public Network(IPAddress ipAddress) : this(ipAddress, GetHostAddressPrefix(ipAddress))
     {
@@ -1018,68 +984,16 @@ public class Network : IComparable<Network>
     /// </param>
     /// <param name="network"></param>
     /// <returns>True if the network was successfully parsed, otherwise false</returns>
-    public static bool TryParse(string ipNetworkString, out Network network)
+    public static bool TryParse(string ipNetworkString, [NotNullWhen(true)] out Network? network)
     {
-        network = null!;
-
-        var networkParts = ipNetworkString.Split(' ', '/');
-
-        if (networkParts.Length is 0 or > 3)
-            return false;
-
-        if (!IPAddress.TryParse(networkParts[0], out var networkPart))
+        if (TryParse(ipNetworkString, out var networkAddress, out var addressLength))
         {
-            // BUG: this can throw if it fails to resolve the name...
-            IPAddress[] hostAddresses;
-
-            try
-            {
-                // Dns.GetHostAddresses will throw on failure and there is no TryGetHostAddresses version
-                hostAddresses = Dns.GetHostAddresses(networkParts[0]);
-                if (hostAddresses.Length == 0)
-                    return false;
-            }
-            catch
-            {
-                return false;
-            }
-
-            networkPart = hostAddresses[0];
+            network = new Network(networkAddress, addressLength);
+            return true;
         }
 
-        var prefixLength = 0;
-        IPAddress? maskAddress = null;
-
-        switch (networkParts.Length)
-        {
-            case 1:
-                switch (networkPart.AddressFamily)
-                {
-                    case AddressFamily.InterNetwork:
-                        prefixLength = 32;
-                        break;
-                    case AddressFamily.InterNetworkV6:
-                        prefixLength = 128;
-                        break;
-                    default:
-                        return false;
-                }
-
-                break;
-            case 2:
-                if (!int.TryParse(networkParts[1], out prefixLength))
-                    if (!IPAddress.TryParse(networkParts[1], out maskAddress))
-                        return false;
-
-                break;
-        }
-
-        if (maskAddress != null)
-            network = new Network(networkPart, maskAddress);
-        else
-            network = new Network(networkPart, prefixLength);
-
-        return true;
+        network = default;
+        return false;
     }
 
     // should these helper functions be somewhere else
@@ -1151,6 +1065,120 @@ public class Network : IComparable<Network>
         return RemoveNetwork(listOfNetworks, networkToRemove);
     }
 
+    private void SetNetworkValues(IPAddress ipAddress, int prefix)
+    {
+        if (ipAddress.AddressFamily != AddressFamily.InterNetwork && ipAddress.AddressFamily != AddressFamily.InterNetworkV6)
+            throw new NotSupportedException($"Non-IPv4 or IPv6 addresses are not supported. The specified address family is {ipAddress.AddressFamily}");
+
+        if (ipAddress.AddressFamily == AddressFamily.InterNetwork && prefix > 32)
+            throw new ArgumentOutOfRangeException(nameof(prefix), "Maximum mask length of a IPv4 address is 32");
+
+        if (ipAddress.AddressFamily == AddressFamily.InterNetworkV6 && prefix > 128)
+            throw new ArgumentOutOfRangeException(nameof(prefix), "Maximum mask length of a IPv6 address is 128");
+
+        Address = ipAddress;
+        Prefix = prefix;
+
+        Version = ipAddress.AddressFamily switch
+        {
+            AddressFamily.InterNetwork => IPVersion.IPv4,
+            AddressFamily.InterNetworkV6 => IPVersion.IPv6,
+            _ => throw new ArgumentOutOfRangeException()
+        };
+
+        NetworkMaskBits = Version switch
+        {
+            IPVersion.IPv4 => Ipv4NetworkMaskBits[Prefix],
+            IPVersion.IPv6 => Ipv6NetworkMaskBits[Prefix],
+            _ => throw new ArgumentOutOfRangeException()
+        };
+
+        HostMaskBits = Version switch
+        {
+            IPVersion.IPv4 => Ipv4HostMaskBits[Prefix],
+            IPVersion.IPv6 => Ipv6HostMaskBits[Prefix],
+            _ => throw new ArgumentOutOfRangeException()
+        };
+
+        // truncate the network address
+        // for example 10.1.2.3/8 becomes 10.0.0.0/8
+        NetworkBits = ipAddress.ToUInt128() & NetworkMaskBits;
+        Address = UInt128ToIpAddress(NetworkBits);
+
+        AddressLength = Version switch
+        {
+            IPVersion.IPv4 => 32,
+            IPVersion.IPv6 => 128,
+            _ => throw new ArgumentOutOfRangeException()
+        };
+    }
+
+    private static bool TryParse(string ipNetworkString, out IPAddress? networkAddress, out ushort addressLength)
+    {
+        networkAddress = default;
+        addressLength = default;
+
+        var networkParts = ipNetworkString.Split(' ', '/');
+
+        if (networkParts.Length is 0 or > 3)
+            return false;
+
+        if (!IPAddress.TryParse(networkParts[0], out var networkPart))
+        {
+            // BUG: this can throw if it fails to resolve the name...
+            IPAddress[] hostAddresses;
+
+            try
+            {
+                // Dns.GetHostAddresses will throw on failure and there is no TryGetHostAddresses version
+                hostAddresses = Dns.GetHostAddresses(networkParts[0]);
+                if (hostAddresses.Length == 0)
+                    return false;
+            }
+            catch
+            {
+                return false;
+            }
+
+            networkPart = hostAddresses[0];
+        }
+
+        var prefixLength = 0;
+        IPAddress? maskAddress = null;
+
+        switch (networkParts.Length)
+        {
+            case 1:
+                switch (networkPart.AddressFamily)
+                {
+                    case AddressFamily.InterNetwork:
+                        prefixLength = 32;
+                        break;
+                    case AddressFamily.InterNetworkV6:
+                        prefixLength = 128;
+                        break;
+                    default:
+                        return false;
+                }
+
+                break;
+            case 2:
+                if (!int.TryParse(networkParts[1], out prefixLength))
+                    if (!IPAddress.TryParse(networkParts[1], out maskAddress))
+                        return false;
+
+                break;
+        }
+
+        networkAddress = networkPart;
+        if (maskAddress != null)
+            addressLength = (ushort)GetPrefix(maskAddress);
+        else
+            addressLength = (ushort)prefixLength;
+
+        return true;
+    }
+
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private IPAddress UInt128ToIpAddress(UInt128 addressBits)
     {
@@ -1169,5 +1197,36 @@ public class Network : IComparable<Network>
             return -1;
 
         return 1;
+    }
+
+    [EditorBrowsable(EditorBrowsableState.Never)]
+    public XmlSchema? GetSchema()
+    {
+        return null;
+    }
+
+    [EditorBrowsable(EditorBrowsableState.Never)]
+    public void ReadXml(XmlReader reader)
+    {
+        reader.MoveToContent();
+
+        if (reader.IsEmptyElement)
+            throw new NullReferenceException();
+
+        reader.ReadStartElement();
+        var macAddressText = reader.ReadString();
+
+        if (TryParse(macAddressText, out var networkAddress, out var prefix))
+            SetNetworkValues(networkAddress, prefix);
+        else
+            throw new FormatException("Address is malformed");
+
+        reader.ReadEndElement();
+    }
+
+    [EditorBrowsable(EditorBrowsableState.Never)]
+    public void WriteXml(XmlWriter writer)
+    {
+        writer.WriteString(ToString());
     }
 }

@@ -16,6 +16,7 @@
  */
 
 using System.Text.Json;
+using System.Xml.Serialization;
 using Bitvantage.NetworkAddressing.Ethernet;
 
 namespace Test.Ethernet;
@@ -71,49 +72,6 @@ internal class MacAddressTests
             """
             "DE-AD-BE-EF-00-07"
             """;
-
-        Assert.That(actual, Is.EqualTo(expected));
-    }
-
-    [Test]
-    public void JsonConverter_02()
-    {
-        var macAddresses = new List<MacAddress> { "dead:beef:0007", "dead:beef:0000" };
-
-        var actual = JsonSerializer.Serialize(macAddresses);
-
-        var expected =
-            """
-            ["DE-AD-BE-EF-00-07","DE-AD-BE-EF-00-00"]
-            """;
-
-        Assert.That(actual, Is.EqualTo(expected));
-    }
-
-    [Test]
-    public void JsonConverter_03()
-    {
-        var json =
-            """
-            "dead:beef:0007"
-            """;
-
-        var actual = JsonSerializer.Deserialize<MacAddress>(json);
-        var expected = MacAddress.Parse("dead:beef:0007");
-
-        Assert.That(actual, Is.EqualTo(expected));
-    }
-
-    [Test]
-    public void JsonConverter_04()
-    {
-        var json =
-            """
-            ["dead:beef:0007","dead:beef:0000"]
-            """;
-
-        var actual = JsonSerializer.Deserialize<List<MacAddress>>(json);
-        var expected = new List<MacAddress> { "dead:beef:0007", "dead:beef:0000" };
 
         Assert.That(actual, Is.EqualTo(expected));
     }
@@ -270,6 +228,89 @@ internal class MacAddressTests
     {
         var macAddress = MacAddress.Parse("deadbeefabcd");
         Assert.That(macAddress.ToString(""), Is.EqualTo(""));
+    }
+
+
+    [Test]
+    public void XmlConverter_01()
+    {
+        var macAddress = MacAddress.Parse("dead:beef:0007");
+
+        var outputStream = new MemoryStream();
+        var xmlSerializer = new XmlSerializer(typeof(MacAddress));
+        xmlSerializer.Serialize(outputStream, macAddress);
+        outputStream.Seek(0, SeekOrigin.Begin);
+
+        var actual = new StreamReader(outputStream).ReadToEnd();
+
+        var expected =
+            """
+            <?xml version="1.0" encoding="utf-8"?>
+            <MacAddress>DE-AD-BE-EF-00-07</MacAddress>
+            """;
+
+        Assert.That(actual, Is.EqualTo(expected));
+    }
+
+    [Test]
+    public void XmlConverter_02()
+    {
+        var macAddresses = new List<MacAddress> { "dead:beef:0007", "dead:beef:0000" };
+
+        var outputStream = new MemoryStream();
+        var xmlSerializer = new XmlSerializer(typeof(List<MacAddress>));
+        xmlSerializer.Serialize(outputStream, macAddresses);
+        outputStream.Seek(0, SeekOrigin.Begin);
+
+        var actual = new StreamReader(outputStream).ReadToEnd();
+
+        var expected =
+            """
+            <?xml version="1.0" encoding="utf-8"?>
+            <ArrayOfMacAddress xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+              <MacAddress>DE-AD-BE-EF-00-07</MacAddress>
+              <MacAddress>DE-AD-BE-EF-00-00</MacAddress>
+            </ArrayOfMacAddress>
+            """;
+
+        Assert.That(actual, Is.EqualTo(expected));
+    }
+
+    [Test]
+    public void XmlConverter_03()
+    {
+        var xml =
+            """
+            <?xml version="1.0" encoding="utf-8"?>
+            <MacAddress>DE-AD-BE-EF-00-07</MacAddress>
+            """;
+
+        var inputStream = new StringReader(xml);
+        var xmlSerializer = new XmlSerializer(typeof(MacAddress));
+        var actual = (MacAddress)xmlSerializer.Deserialize(inputStream);
+        var expected = MacAddress.Parse("dead:beef:0007");
+
+        Assert.That(actual, Is.EqualTo(expected));
+    }
+
+    [Test]
+    public void XmlConverter_04()
+    {
+        var xml =
+            """
+            <?xml version="1.0" encoding="utf-8"?>
+            <ArrayOfMacAddress xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+              <MacAddress>DE-AD-BE-EF-00-07</MacAddress>
+              <MacAddress>DE-AD-BE-EF-00-00</MacAddress>
+            </ArrayOfMacAddress>
+            """;
+
+        var inputStream = new StringReader(xml);
+        var xmlSerializer = new XmlSerializer(typeof(List<MacAddress>));
+        var actual = (List<MacAddress>)xmlSerializer.Deserialize(inputStream);
+        var expected = new List<MacAddress> { "dead:beef:0007", "dead:beef:0000" };
+
+        Assert.That(actual, Is.EqualTo(expected));
     }
 }
 

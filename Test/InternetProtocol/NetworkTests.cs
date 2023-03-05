@@ -18,6 +18,7 @@
 using System.Collections.ObjectModel;
 using System.Net;
 using System.Text.Json;
+using System.Xml.Serialization;
 using Bitvantage.NetworkAddressing.InternetProtocol;
 
 namespace Test.InternetProtocol;
@@ -765,6 +766,88 @@ public class NetworkTests
             Hosts/Net:  9,671,406,556,917,033,397,649,406
             
             """;
+
+        Assert.That(actual, Is.EqualTo(expected));
+    }
+
+    [Test]
+    public void XmlConverter_01()
+    {
+        var network = Network.Parse("10.20.30.40/15");
+
+        var outputStream = new MemoryStream();
+        var xmlSerializer = new XmlSerializer(typeof(Network));
+        xmlSerializer.Serialize(outputStream, network);
+        outputStream.Seek(0, SeekOrigin.Begin);
+
+        var actual = new StreamReader(outputStream).ReadToEnd();
+
+        var expected =
+            """
+            <?xml version="1.0" encoding="utf-8"?>
+            <Network>10.20.0.0/15</Network>
+            """;
+
+        Assert.That(actual, Is.EqualTo(expected));
+    }
+
+    [Test]
+    public void XmlConverter_02()
+    {
+        var networks = new List<Network> { "10.20.30.40/15", "50.60.70.80/15" };
+
+        var outputStream = new MemoryStream();
+        var xmlSerializer = new XmlSerializer(typeof(List<Network>));
+        xmlSerializer.Serialize(outputStream, networks);
+        outputStream.Seek(0, SeekOrigin.Begin);
+
+        var actual = new StreamReader(outputStream).ReadToEnd();
+
+        var expected =
+            """
+            <?xml version="1.0" encoding="utf-8"?>
+            <ArrayOfNetwork xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+              <Network>10.20.0.0/15</Network>
+              <Network>50.60.0.0/15</Network>
+            </ArrayOfNetwork>
+            """;
+
+        Assert.That(actual, Is.EqualTo(expected));
+    }
+
+    [Test]
+    public void XmlConverter_03()
+    {
+        var xml =
+            """
+            <?xml version="1.0" encoding="utf-8"?>
+              <Network>10.20.0.0/15</Network>
+            """;
+
+        var inputStream = new StringReader(xml);
+        var xmlSerializer = new XmlSerializer(typeof(Network));
+        var actual = (Network)xmlSerializer.Deserialize(inputStream);
+        var expected = Network.Parse("10.20.30.40/15");
+
+        Assert.That(actual, Is.EqualTo(expected));
+    }
+
+    [Test]
+    public void XmlConverter_04()
+    {
+        var xml =
+            """
+            <?xml version="1.0" encoding="utf-8"?>
+            <ArrayOfNetwork xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+              <Network>10.20.0.0/15</Network>
+              <Network>50.60.0.0/15</Network>
+            </ArrayOfNetwork>
+            """;
+
+        var inputStream = new StringReader(xml);
+        var xmlSerializer = new XmlSerializer(typeof(List<Network>));
+        var actual = (List<Network>)xmlSerializer.Deserialize(inputStream);
+        var expected = new List<Network> { "10.20.0.0/15", "50.60.0.0/15" };
 
         Assert.That(actual, Is.EqualTo(expected));
     }

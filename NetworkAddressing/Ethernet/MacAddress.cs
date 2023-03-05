@@ -15,18 +15,23 @@
     Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
+using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Text;
 using System.Text.Json.Serialization;
 using System.Text.RegularExpressions;
+using System.Xml;
+using System.Xml.Linq;
+using System.Xml.Schema;
+using System.Xml.Serialization;
 using Bitvantage.NetworkAddressing.Ethernet.Converters;
 
 namespace Bitvantage.NetworkAddressing.Ethernet;
 
 [Serializable]
 [JsonConverter(typeof(MacAddressJsonConverter))]
-public class MacAddress : IComparable<MacAddress>
+public class MacAddress : IComparable<MacAddress>, IXmlSerializable
 {
     public enum MacAddressFormat
     {
@@ -103,7 +108,7 @@ public class MacAddress : IComparable<MacAddress>
             (?>\s*$)
             """, RegexOptions.Compiled | RegexOptions.IgnorePatternWhitespace | RegexOptions.ExplicitCapture);
 
-    internal readonly ulong MacAddressBits;
+    internal ulong MacAddressBits;
 
     /// <summary>
     ///     Returns a new MAC address using the last three octets of the MAC address
@@ -148,6 +153,10 @@ public class MacAddress : IComparable<MacAddress>
     ///     Returns a new MAC address using the first three octets of the MAC address
     /// </summary>
     public MacAddress OrganizationalUniqueIdentifier => new(MacAddressBits & OrganizationalUniqueIdentifierMask);
+
+    private MacAddress()
+    {
+    }
 
     private MacAddress(MacAddress macAddress)
     {
@@ -238,7 +247,7 @@ public class MacAddress : IComparable<MacAddress>
 
     public static MacAddress Parse(string macAddress)
     {
-        return Parse(macAddress, false);
+        return new MacAddress(Parse(macAddress, false).Value);
     }
 
     public override string ToString()
@@ -362,11 +371,11 @@ public class MacAddress : IComparable<MacAddress>
             return false;
         }
 
-        parsedMacAddress = macAddress;
+        parsedMacAddress = new MacAddress(macAddress.Value);
         return true;
     }
 
-    private static MacAddress? Parse(string macAddress, [DoesNotReturnIf(false)] bool suppressException)
+    private static ulong? Parse(string macAddress, [DoesNotReturnIf(false)] bool suppressException)
     {
         var macAddressMatch = MacAddressRegex.Match(macAddress);
 
@@ -386,7 +395,7 @@ public class MacAddress : IComparable<MacAddress>
                 }
             );
 
-            return new MacAddress(macAddressInt);
+            return macAddressInt;
         }
 
         if (suppressException)
@@ -394,7 +403,6 @@ public class MacAddress : IComparable<MacAddress>
 
         throw new ArgumentException("Unsupported format", nameof(macAddress));
     }
-
 
     public int CompareTo(MacAddress? other)
     {
@@ -405,5 +413,32 @@ public class MacAddress : IComparable<MacAddress>
             return 1;
 
         return MacAddressBits.CompareTo(other.MacAddressBits);
+    }
+
+    [EditorBrowsable(EditorBrowsableState.Never)]
+    public XmlSchema? GetSchema()
+    {
+        return null;
+    }
+
+    [EditorBrowsable(EditorBrowsableState.Never)]
+    public void ReadXml(XmlReader reader)
+    {
+        reader.MoveToContent();
+
+        if (reader.IsEmptyElement)
+            throw new NullReferenceException();
+
+        reader.ReadStartElement();
+        var macAddressText = reader.ReadString();
+        MacAddressBits = Parse(macAddressText, false).Value;
+
+        reader.ReadEndElement();
+    }
+
+    [EditorBrowsable(EditorBrowsableState.Never)]
+    public void WriteXml(XmlWriter writer)
+    {
+        writer.WriteString(ToString());
     }
 }
