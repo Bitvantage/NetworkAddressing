@@ -28,41 +28,42 @@ public class MacAddress
     public enum MacAddressFormat
     {
         /// <summary>
-        /// 01-02-03-AB-CD-EF
+        ///     01-02-03-AB-CD-EF
         /// </summary>
         Ieee,
+
         /// <summary>
-        /// 01.02.03.ab.cd.ef
+        ///     01.02.03.ab.cd.ef
         /// </summary>
         Ietf,
 
         /// <summary>
-        /// 01-02-03-ab-cd-ef
+        ///     01-02-03-ab-cd-ef
         /// </summary>
         DoubleDash,
 
         /// <summary>
-        /// 01:02:03:ab:cd:ef
+        ///     01:02:03:ab:cd:ef
         /// </summary>
         DoubleColon,
 
         /// <summary>
-        /// 01.02.03.ab.cd.ef
+        ///     01.02.03.ab.cd.ef
         /// </summary>
         DoubleDot,
 
         /// <summary>
-        /// 0102:03ab:cdef
+        ///     0102:03ab:cdef
         /// </summary>
         QuadColon,
 
         /// <summary>
-        /// 0102.03ab.cdef
+        ///     0102.03ab.cdef
         /// </summary>
         QuadDot,
 
         /// <summary>
-        /// 010203abcdef
+        ///     010203abcdef
         /// </summary>
         Full // TODO: Better name?
     }
@@ -214,7 +215,7 @@ public class MacAddress
 
     public static implicit operator MacAddress(byte[] value)
     {
-        return new(value);
+        return new MacAddress(value);
     }
 
     public static bool operator !=(MacAddress mac1, MacAddress mac2)
@@ -243,7 +244,7 @@ public class MacAddress
     }
 
     /// <summary>
-    /// Returns a string, replacing each occurrence of 'x' or 'X' with the respective part of the MAC address
+    ///     Returns a string, replacing each occurrence of 'x' or 'X' with the respective part of the MAC address
     /// </summary>
     /// <param name="format"></param>
     /// <returns></returns>
