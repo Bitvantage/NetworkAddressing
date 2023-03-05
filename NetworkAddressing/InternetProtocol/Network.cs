@@ -673,7 +673,7 @@ public class Network : IComparable<Network>, IXmlSerializable
     }
 
     /// <summary>
-    ///     XXXXXXXXXXXXXXXXXXXXXXXXX Fix this... the
+    ///     Increments this network
     ///     <param name="valueToAdd" />
     ///     to the
     /// </summary>
