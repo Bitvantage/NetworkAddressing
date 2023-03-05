@@ -18,11 +18,14 @@
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Text;
+using System.Text.Json.Serialization;
 using System.Text.RegularExpressions;
+using Bitvantage.NetworkAddressing.Ethernet.Converters;
 
 namespace Bitvantage.NetworkAddressing.Ethernet;
 
 [Serializable]
+[JsonConverter(typeof(MacAddressJsonConverter))]
 public class MacAddress : IComparable<MacAddress>
 {
     public enum MacAddressFormat

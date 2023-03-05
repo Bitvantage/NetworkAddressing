@@ -17,6 +17,7 @@
 
 using System.Collections.ObjectModel;
 using System.Net;
+using System.Text.Json;
 using Bitvantage.NetworkAddressing.InternetProtocol;
 
 namespace Test.InternetProtocol;
@@ -479,6 +480,64 @@ public class NetworkTests
         var network2 = Network.Parse("10.1.0.0/16");
 
         Assert.That(network2, Is.GreaterThan(network1));
+    }
+
+    [Test]
+    public void JsonConverter_01()
+    {
+        var network = Network.Parse("10.20.30.40");
+
+        var actual = JsonSerializer.Serialize(network);
+
+        var expected =
+            """
+            "10.20.30.40/32"
+            """;
+
+        Assert.That(actual, Is.EqualTo(expected));
+    }
+
+    [Test]
+    public void JsonConverter_02()
+    {
+        var networks = new List<Network> { "10.20.30.40", "5.10.15.20" };
+
+        var actual = JsonSerializer.Serialize(networks);
+
+        var expected =
+            """
+            ["10.20.30.40/32","5.10.15.20/32"]
+            """;
+
+        Assert.That(actual, Is.EqualTo(expected));
+    }
+
+    [Test]
+    public void JsonConverter_03()
+    {
+        var json =
+            """
+            "10.20.30.40/32"
+            """;
+
+        var actual = JsonSerializer.Deserialize<Network>(json);
+        var expected = Network.Parse("10.20.30.40");
+
+        Assert.That(actual, Is.EqualTo(expected));
+    }
+
+    [Test]
+    public void JsonConverter_04()
+    {
+        var json =
+            """
+            ["10.20.30.40/32","5.10.15.20/32"]
+            """;
+
+        var actual = JsonSerializer.Deserialize<List<Network>>(json);
+        var expected = new List<Network> { "10.20.30.40", "5.10.15.20" };
+
+        Assert.That(actual, Is.EqualTo(expected));
     }
 
     [Test]

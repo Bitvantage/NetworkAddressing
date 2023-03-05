@@ -15,6 +15,7 @@
     Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
+using System.Text.Json;
 using Bitvantage.NetworkAddressing.Ethernet;
 
 namespace Test.Ethernet;
@@ -31,7 +32,7 @@ internal class MacAddressTests
             "10-20-30-40-50-61",
             "00-00-00-00-00-01",
             "00-00-00-00-00-00",
-            null,
+            null
         };
 
         var expectedResults = new List<MacAddress?>
@@ -41,8 +42,7 @@ internal class MacAddressTests
             "00-00-00-00-00-01",
             "10-20-30-40-50-60",
             "10-20-30-40-50-61",
-            "20-20-30-40-50-60",
-
+            "20-20-30-40-50-60"
         };
 
         var orderedMacAddresses =
@@ -58,6 +58,64 @@ internal class MacAddressTests
     {
         var macAddress = MacAddress.Parse("de:ad:be:ef:ab:cd");
         Assert.That(macAddress.ExtensionIdentifier, Is.EqualTo(new MacAddress(new byte[] { 0x00, 0x00, 0x00, 0xef, 0xab, 0xcd })));
+    }
+
+    [Test]
+    public void JsonConverter_01()
+    {
+        var macAddress = MacAddress.Parse("dead:beef:0007");
+
+        var actual = JsonSerializer.Serialize(macAddress);
+
+        var expected =
+            """
+            "DE-AD-BE-EF-00-07"
+            """;
+
+        Assert.That(actual, Is.EqualTo(expected));
+    }
+
+    [Test]
+    public void JsonConverter_02()
+    {
+        var macAddresses = new List<MacAddress> { "dead:beef:0007", "dead:beef:0000" };
+
+        var actual = JsonSerializer.Serialize(macAddresses);
+
+        var expected =
+            """
+            ["DE-AD-BE-EF-00-07","DE-AD-BE-EF-00-00"]
+            """;
+
+        Assert.That(actual, Is.EqualTo(expected));
+    }
+
+    [Test]
+    public void JsonConverter_03()
+    {
+        var json =
+            """
+            "dead:beef:0007"
+            """;
+
+        var actual = JsonSerializer.Deserialize<MacAddress>(json);
+        var expected = MacAddress.Parse("dead:beef:0007");
+
+        Assert.That(actual, Is.EqualTo(expected));
+    }
+
+    [Test]
+    public void JsonConverter_04()
+    {
+        var json =
+            """
+            ["dead:beef:0007","dead:beef:0000"]
+            """;
+
+        var actual = JsonSerializer.Deserialize<List<MacAddress>>(json);
+        var expected = new List<MacAddress> { "dead:beef:0007", "dead:beef:0000" };
+
+        Assert.That(actual, Is.EqualTo(expected));
     }
 
     [Test]

@@ -21,6 +21,8 @@ using System.Net.Sockets;
 using System.Numerics;
 using System.Runtime.CompilerServices;
 using System.Text;
+using System.Text.Json.Serialization;
+using Bitvantage.NetworkAddressing.InternetProtocol.Converters;
 
 namespace Bitvantage.NetworkAddressing.InternetProtocol;
 
@@ -64,6 +66,7 @@ public enum IPVersion
 }
 
 [Serializable]
+[JsonConverter(typeof(NetworkJsonConverter))]
 public class Network : IComparable<Network>
 {
     private static readonly UInt128[] Ipv4HostMaskBits = new UInt128[33];
