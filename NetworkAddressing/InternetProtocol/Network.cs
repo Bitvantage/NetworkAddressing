@@ -118,7 +118,7 @@ public class Network : IComparable<Network>
                 throw new ArgumentException($"{this} has no complementary network");
 
             // XOR the last bit in the network
-            var complementaryBits = NetworkBits ^ UInt128.One << AddressLength - Prefix;
+            var complementaryBits = NetworkBits ^ (UInt128.One << (AddressLength - Prefix));
 
             // convert the bits to an IP address
             var complementaryAddress = UInt128ToIpAddress(complementaryBits);
@@ -173,7 +173,7 @@ public class Network : IComparable<Network>
             if (Prefix == AddressLength - 1)
                 return UInt128ToIpAddress(NetworkBits ^ HostMaskBits);
 
-            return UInt128ToIpAddress(NetworkBits ^ HostMaskBits - 1); // BUG: is this correct?
+            return UInt128ToIpAddress(NetworkBits ^ (HostMaskBits - 1)); // BUG: is this correct?
         }
     }
 
@@ -265,18 +265,18 @@ public class Network : IComparable<Network>
     {
         // compute the bit values for all possible masks
         for (var i = 31; i >= 0; i--)
-            Ipv4HostMaskBits[i] = Ipv4HostMaskBits[i + 1] << 1 ^ 1;
+            Ipv4HostMaskBits[i] = (Ipv4HostMaskBits[i + 1] << 1) ^ 1;
 
         for (var i = 127; i >= 0; i--)
-            Ipv6HostMaskBits[i] = Ipv6HostMaskBits[i + 1] << 1 ^ 1;
+            Ipv6HostMaskBits[i] = (Ipv6HostMaskBits[i + 1] << 1) ^ 1;
 
         Ipv4NetworkMaskBits[32] = 0xff_ff_ff_ff;
         for (var i = 31; i >= 0; i--)
-            Ipv4NetworkMaskBits[i] = Ipv4NetworkMaskBits[i + 1] << 1 & Ipv4NetworkMaskBits[32];
+            Ipv4NetworkMaskBits[i] = (Ipv4NetworkMaskBits[i + 1] << 1) & Ipv4NetworkMaskBits[32];
 
         Ipv6NetworkMaskBits[128] = new UInt128(0xff_ff_ff_ff_ff_ff_ff_ff, 0xff_ff_ff_ff_ff_ff_ff_ff);
         for (var i = 127; i >= 0; i--)
-            Ipv6NetworkMaskBits[i] = Ipv6NetworkMaskBits[i + 1] << 1 & Ipv6NetworkMaskBits[128];
+            Ipv6NetworkMaskBits[i] = (Ipv6NetworkMaskBits[i + 1] << 1) & Ipv6NetworkMaskBits[128];
 
         // compute the IP address objects for all possible masks
         for (var i = 0; i < 33; i++)
@@ -367,13 +367,13 @@ public class Network : IComparable<Network>
 
         // calculate the total addresses per network
         for (var i = 0; i < 32; i++)
-            Ipv4AddressCount[i] = BigInteger.One << 32 - i;
+            Ipv4AddressCount[i] = BigInteger.One << (32 - i);
 
         Ipv4AddressCount[32] = 1;
 
 
         for (var i = 0; i < 128; i++)
-            Ipv6AddressCount[i] = BigInteger.One << 128 - i;
+            Ipv6AddressCount[i] = BigInteger.One << (128 - i);
 
         Ipv6AddressCount[128] = 1;
 
@@ -639,7 +639,8 @@ public class Network : IComparable<Network>
     }
 
     /// <summary>
-    ///     Computes the smallest network that contains all of the networks. The resulting network may contain additional address space.
+    ///     Computes the smallest network that contains all of the networks. The resulting network may contain additional
+    ///     address space.
     /// </summary>
     /// <param name="ipNetworks">List of networks</param>
     /// <returns>The network which contains all of the supplied networks.</returns>
@@ -698,7 +699,7 @@ public class Network : IComparable<Network>
         else
         {
             startAddress = NetworkBits + 1;
-            endAddress = NetworkBits ^ HostMaskBits - 1; // BUG: is this correct?
+            endAddress = NetworkBits ^ (HostMaskBits - 1); // BUG: is this correct?
         }
 
         for (var i = startAddress; i <= endAddress; i++)
@@ -706,19 +707,24 @@ public class Network : IComparable<Network>
     }
 
     /// <summary>
-    /// XXXXXXXXXXXXXXXXXXXXXXXXX Fix this... the <param name="valueToAdd"/> to the 
+    ///     XXXXXXXXXXXXXXXXXXXXXXXXX Fix this... the
+    ///     <param name="valueToAdd" />
+    ///     to the
     /// </summary>
     /// <param name="network">The network to add to</param>
     /// <param name="valueToAdd">The number of networks to add</param>
     /// <returns></returns>
-    /// <exception cref="ArgumentOutOfRangeException">Thrown when it is not possible to add the <paramref name="valueToAdd"/> to the <paramref name="network"/></exception>
+    /// <exception cref="ArgumentOutOfRangeException">
+    ///     Thrown when it is not possible to add the <paramref name="valueToAdd" />
+    ///     to the <paramref name="network" />
+    /// </exception>
     public static Network operator +(Network network, UInt128 valueToAdd)
     {
         try
         {
             checked
             {
-                var addressesPerNetwork = UInt128.One << network.AddressLength - network.Prefix;
+                var addressesPerNetwork = UInt128.One << (network.AddressLength - network.Prefix);
                 var addressesToAdd = addressesPerNetwork * valueToAdd;
                 var networkBits = network.NetworkBits + addressesToAdd;
 
@@ -795,7 +801,7 @@ public class Network : IComparable<Network>
         {
             checked
             {
-                var addressesPerNetwork = UInt128.One << network.AddressLength - network.Prefix;
+                var addressesPerNetwork = UInt128.One << (network.AddressLength - network.Prefix);
                 var addressToSubtract = addressesPerNetwork * valueToSubtract;
                 var networkBits = network.NetworkBits - addressToSubtract;
 
@@ -821,7 +827,8 @@ public class Network : IComparable<Network>
     ///     Parses a string to a <c>Network</c> object
     /// </summary>
     /// <param name="ipNetworkString">
-    ///     A string that represents a network The following formats are supported:10.0.0.0/24, myhost/24, 10.0.0.10, 10.0.0.0 255.255.255.0, myhost.mydomain.org 255.255.255.0, myhost
+    ///     A string that represents a network The following formats are supported:10.0.0.0/24, myhost/24, 10.0.0.10, 10.0.0.0
+    ///     255.255.255.0, myhost.mydomain.org 255.255.255.0, myhost
     /// </param>
     /// <returns>The parsed network object</returns>
     public static Network Parse(string ipNetworkString)
@@ -868,8 +875,8 @@ public class Network : IComparable<Network>
         if (prefixLength >= AddressLength)
             throw new InvalidOperationException($"The split target for {this} of {Address}/{prefixLength} is not valid");
 
-        var sizeOfNewNetworks = UInt128.One << AddressLength - prefixLength;
-        var numberOfNewNetworks = UInt128.One << prefixLength - Prefix;
+        var sizeOfNewNetworks = UInt128.One << (AddressLength - prefixLength);
+        var numberOfNewNetworks = UInt128.One << (prefixLength - Prefix);
 
         var currentNetworkBits = NetworkBits;
         for (UInt128 i = 0; i < numberOfNewNetworks; i++)
@@ -882,8 +889,10 @@ public class Network : IComparable<Network>
             currentNetworkBits += sizeOfNewNetworks;
         }
     }
+
     /// <summary>
-    /// Summarizes a list of networks such that the returned networks represents a compact and equivalent representation of the original networks.
+    ///     Summarizes a list of networks such that the returned networks represents a compact and equivalent representation of
+    ///     the original networks.
     /// </summary>
     /// <param name="networks">List of networks to summarize</param>
     /// <returns>A summarized, compact, and equivalent form of the original networks</returns>
@@ -934,8 +943,8 @@ public class Network : IComparable<Network>
 
         // return each network in the network lookup table
         foreach (var ipNetworks in networksByPrefix.Values)
-            foreach (var ipNetwork in ipNetworks)
-                yield return ipNetwork.Value;
+        foreach (var ipNetwork in ipNetworks)
+            yield return ipNetwork.Value;
     }
 
     public override string ToString()
@@ -960,41 +969,41 @@ public class Network : IComparable<Network>
                 return $"{Address}";
 
             case NetworkFormat.Detail:
+            {
+                var sb = new StringBuilder();
+
+                var networkProperty = new List<(string Field, string Value, string Bits)>();
+                networkProperty.Add(new ValueTuple<string, string, string>("Address:", Address.ToString(), BitsToString(NetworkBits)));
+                networkProperty.Add(new ValueTuple<string, string, string>("Mask:", Mask.ToString(), BitsToString(NetworkMaskBits)));
+                networkProperty.Add(new ValueTuple<string, string, string>("Wildcard:", Wildcard.ToString(), BitsToString(Wildcard)));
+                networkProperty.Add(new ValueTuple<string, string, string>("Broadcast:", Broadcast.ToString(), BitsToString(Broadcast)));
+
+                if (Prefix > 0)
                 {
-                    var sb = new StringBuilder();
-
-                    var networkProperty = new List<(string Field, string Value, string Bits)>();
-                    networkProperty.Add(new("Address:", Address.ToString(), BitsToString(NetworkBits)));
-                    networkProperty.Add(new("Mask:", Mask.ToString(), BitsToString(NetworkMaskBits)));
-                    networkProperty.Add(new("Wildcard:", Wildcard.ToString(), BitsToString(Wildcard)));
-                    networkProperty.Add(new("Broadcast:", Broadcast.ToString(), BitsToString(Broadcast)));
-
-                    if (Prefix > 0)
-                    {
-                        networkProperty.Add(new("First Host:", FirstHost.ToString(), BitsToString(FirstHost)));
-                        networkProperty.Add(new("Last Host:", LastHost.ToString(), BitsToString(LastHost)));
-                    }
-
-                    networkProperty.Add(new("Hosts/Net:", TotalHosts.ToString("0,0", CultureInfo.InvariantCulture), ""));
-
-                    var column = new int[3];
-                    foreach (var (field, value, bits) in networkProperty)
-                    {
-                        if (field.Length > column[0])
-                            column[0] = field.Length;
-
-                        if (value.Length > column[1])
-                            column[1] = value.Length;
-
-                        if (bits.Length > column[2])
-                            column[2] = bits.Length;
-                    }
-
-                    foreach (var (field, value, bits) in networkProperty)
-                        sb.AppendLine($"{field.PadRight(column[0])} {value.PadRight(column[1])}  {bits.PadRight(column[2])}".TrimEnd());
-
-                    return sb.ToString();
+                    networkProperty.Add(new ValueTuple<string, string, string>("First Host:", FirstHost.ToString(), BitsToString(FirstHost)));
+                    networkProperty.Add(new ValueTuple<string, string, string>("Last Host:", LastHost.ToString(), BitsToString(LastHost)));
                 }
+
+                networkProperty.Add(new ValueTuple<string, string, string>("Hosts/Net:", TotalHosts.ToString("0,0", CultureInfo.InvariantCulture), ""));
+
+                var column = new int[3];
+                foreach (var (field, value, bits) in networkProperty)
+                {
+                    if (field.Length > column[0])
+                        column[0] = field.Length;
+
+                    if (value.Length > column[1])
+                        column[1] = value.Length;
+
+                    if (bits.Length > column[2])
+                        column[2] = bits.Length;
+                }
+
+                foreach (var (field, value, bits) in networkProperty)
+                    sb.AppendLine($"{field.PadRight(column[0])} {value.PadRight(column[1])}  {bits.PadRight(column[2])}".TrimEnd());
+
+                return sb.ToString();
+            }
             default:
                 throw new ArgumentOutOfRangeException();
         }
@@ -1004,7 +1013,8 @@ public class Network : IComparable<Network>
     ///     Attempts to parse a string to a <c>Network</c> object
     /// </summary>
     /// <param name="ipNetworkString">
-    ///     A string that represents a network. The following formats are supported:10.0.0.0/24, myhost/24, 10.0.0.10, 10.0.0.0 255.255.255.0, myhost.mydomain.org 255.255.255.0, myhost
+    ///     A string that represents a network. The following formats are supported:10.0.0.0/24, myhost/24, 10.0.0.10, 10.0.0.0
+    ///     255.255.255.0, myhost.mydomain.org 255.255.255.0, myhost
     /// </param>
     /// <param name="network"></param>
     /// <returns>True if the network was successfully parsed, otherwise false</returns>
@@ -1084,7 +1094,7 @@ public class Network : IComparable<Network>
 
         for (var i = AddressLength - 1; i >= 0; i--)
         {
-            if ((value & UInt128.One << i) > UInt128.Zero)
+            if ((value & (UInt128.One << i)) > UInt128.Zero)
                 sb.Append('1');
             else
                 sb.Append('0');
