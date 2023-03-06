@@ -742,6 +742,11 @@ public class Network : IComparable<Network>, IXmlSerializable
         return Parse(value);
     }
 
+    public static implicit operator string(Network value)
+    {
+        return value.ToString();
+    }
+
     public static bool operator !=(Network network1, Network network2)
     {
         return !(network1 == network2);

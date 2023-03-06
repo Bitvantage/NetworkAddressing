@@ -22,7 +22,6 @@ using System.Text;
 using System.Text.Json.Serialization;
 using System.Text.RegularExpressions;
 using System.Xml;
-using System.Xml.Linq;
 using System.Xml.Schema;
 using System.Xml.Serialization;
 using Bitvantage.NetworkAddressing.Ethernet.Converters;
@@ -223,6 +222,11 @@ public class MacAddress : IComparable<MacAddress>, IXmlSerializable
     public static implicit operator MacAddress(string value)
     {
         return Parse(value);
+    }
+
+    public static implicit operator string(MacAddress value)
+    {
+        return value.ToString();
     }
 
     public static implicit operator MacAddress(byte[] value)

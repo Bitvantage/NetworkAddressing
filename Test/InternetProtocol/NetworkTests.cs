@@ -484,6 +484,24 @@ public class NetworkTests
     }
 
     [Test]
+    public void ImplicitConversion_01()
+    {
+        Network actual = "192.168.13.0/24";
+        var expected = new Network(new IPAddress(new byte[] { 192, 168, 13, 0 }), 24);
+
+        Assert.That(actual, Is.EqualTo(expected));
+    }
+
+    [Test]
+    public void ImplicitConversion_02()
+    {
+        string actual = new Network(new IPAddress(new byte[] { 192, 168, 13, 0 }), 24);
+        var expected = "192.168.13.0/24";
+
+        Assert.That(actual, Is.EqualTo(expected));
+    }
+
+    [Test]
     public void JsonConverter_01()
     {
         var network = Network.Parse("10.20.30.40");

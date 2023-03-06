@@ -62,6 +62,24 @@ internal class MacAddressTests
     }
 
     [Test]
+    public void ImplicitConversion_01()
+    {
+        MacAddress actual = "DEad.bEeF.ABcd";
+        var expected = new MacAddress(0xde, 0xad, 0xbe, 0xef, 0xab, 0xcd);
+
+        Assert.That(actual, Is.EqualTo(expected));
+    }
+
+    [Test]
+    public void ImplicitConversion_02()
+    {
+        string actual = new MacAddress(0xde, 0xad, 0xbe, 0xef, 0xab, 0xcd);
+        var expected = "DE-AD-BE-EF-AB-CD";
+
+        Assert.That(actual, Is.EqualTo(expected));
+    }
+
+    [Test]
     public void JsonConverter_01()
     {
         var macAddress = MacAddress.Parse("dead:beef:0007");
