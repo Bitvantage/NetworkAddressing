@@ -11,9 +11,9 @@
     <PackageIcon>icon.png</PackageIcon>
     <RepositoryType>git</RepositoryType>
     <PackageTags>network;networking;ip network;mac;mac address;oui;network lookup;ipaddress; ip address;route;routing;lookup;trie;tree</PackageTags>
-    <VersionPrefix>1.0.2</VersionPrefix>
-    <FileVersion>1.0.2</FileVersion>
-    <AssemblyVersion>1.0.2</AssemblyVersion>
+    <VersionPrefix>1.0.3</VersionPrefix>
+    <FileVersion>1.0.3</FileVersion>
+    <AssemblyVersion>1.0.3</AssemblyVersion>
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <Copyright>LGPL-2.1-only</Copyright>
     <PackageLicenseExpression>LGPL-2.1-only</PackageLicenseExpression>
