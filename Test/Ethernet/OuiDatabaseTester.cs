@@ -116,5 +116,17 @@ internal class OuiDatabaseTester
 
         var z = ouiDatabase["1C-1B-0D-EF-9F-2B"];
         var z2 = ouiDatabase[new byte[] { 0x1C, 0x1B, 0x0D, 0xEF, 0x9F, 0x2B }];
+    }  
+    
+    [Test]
+    public void OuiRecord_04()
+    {
+        var ouiDatabase = new OuiDatabase(new OuiDatabaseOptions(){SynchronousUpdate = true});
+
+        var ouiRecord = ouiDatabase["F8-0D-AC-00-00-00"];
+
+        Assert.That(ouiRecord.Organization, Is.EqualTo("HP Inc."));
+        Assert.That(ouiRecord.Address, Is.EqualTo("10300 Energy Dr\nSpring  TX  77389\nUS"));
+        Assert.That(ouiRecord.Prefix.ToString(), Is.EqualTo("F8-0D-AC-00-00-00"));
     }
 }

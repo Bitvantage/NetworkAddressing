@@ -16,7 +16,6 @@
  */
 
 using System.Collections;
-using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.IO.Compression;
@@ -27,7 +26,7 @@ namespace Bitvantage.NetworkAddressing.Ethernet;
 
 public class OuiDatabase : IReadOnlyDictionary<MacAddress, OuiRecord>, IDisposable
 {
-    private const ulong OuiMask = 0b01111111_11111111_11111111_00000000_00000000_00000000;
+    private const ulong OuiMask = 0b11111110_11111111_11111111_00000000_00000000_00000000;
     private static readonly Lazy<OuiDatabase> DefaultInstance = new(() => new OuiDatabase(new OuiDatabaseOptions()), LazyThreadSafetyMode.ExecutionAndPublication);
     private readonly DateTime _internalDatabaseDateTime = new(2023, 02, 20);
     private readonly OuiDatabaseOptions _options;
@@ -199,7 +198,7 @@ public class OuiDatabase : IReadOnlyDictionary<MacAddress, OuiRecord>, IDisposab
                 .DistinctBy(item => item.Prefix.MacAddressBits);
 
         var database = new OuiDatabaseInternal { Version = version };
-        foreach (var ouiRecord in ouiRecords)
+        foreach (var ouiRecord in ouiRecords) 
             database.Add(ouiRecord.Prefix.MacAddressBits, ouiRecord);
 
         if (database.Count == 0)
@@ -309,7 +308,16 @@ public class OuiDatabase : IReadOnlyDictionary<MacAddress, OuiRecord>, IDisposab
         return _database.TryGetValue(oui, out value);
     }
 
-    public OuiRecord this[MacAddress key] => _database[key.MacAddressBits & OuiMask];
+    public OuiRecord this[MacAddress key]
+    {
+        get
+        {
+            if (!TryGetValue(key, out var value))
+                throw new KeyNotFoundException($"The given key '{key}' was not present in the dictionary.");
+
+            return value;
+        }
+    }
 
     public IEnumerable<MacAddress> Keys => _database.Keys.Select(item => new MacAddress(item));
     public IEnumerable<OuiRecord> Values => _database.Values;
